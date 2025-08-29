@@ -9,7 +9,7 @@ import org.json.JSONObject
 import android.content.Context
 import android.util.Log
 import ru.rustore.sdk.pay.RuStorePayClient
-import ru.rustore.sdk.pay.model.purchase.PurchaseAvailabilityResult
+import ru.rustore.sdk.pay.model.PurchaseAvailabilityResult
 
 class RustorePayPlugin : CordovaPlugin() {
     
