@@ -1,0 +1,41 @@
+{
+  "name": "cordova-plugin-rustore-pay",
+  "version": "1.0.0",
+  "description": "Cordova plugin for rustore-pay",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maximnara/cordova-plugin-rustore-pay"
+  },
+  "keywords": [
+    "cordova",
+    "ecosystem:cordova",
+    "cordova-android",
+    "cordova-ios",
+    "rustore-pay"
+  ],
+  "author": "luzhkov",
+  "license": "MIT",
+  "cordova": {
+    "id": "cordova-plugin-rustore-pay",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "engines": [
+    {
+      "name": "cordova",
+      "version": ">=12.0.0"
+    }
+  ],
+  "dependencies": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "cordova": "^12.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/maximnara/cordova-plugin-rustore-pay/issues"
+  },
+  "homepage": "https://github.com/maximnara/cordova-plugin-rustore-pay"
+}

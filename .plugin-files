@@ -1,0 +1,4 @@
+ANDROID_FILE=src/android/RustorePayPlugin.kt
+IOS_FILE=src/ios/RustorePayPlugin.swift
+IOS_HEADER_FILE=src/ios/RustorePayPlugin.h
+JS_FILE=www/rustore-pay.js
