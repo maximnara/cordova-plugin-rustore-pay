@@ -142,6 +142,7 @@ let RustorePay = (function () {
             });
         },
 
+
         /**
          * getProducts
          * @param {Object} params - method parameters

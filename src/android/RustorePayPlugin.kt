@@ -15,6 +15,8 @@ import ru.rustore.sdk.pay.model.ProductId
 import ru.rustore.sdk.pay.model.PurchaseAvailabilityResult
 import ru.rustore.sdk.pay.model.ProductPurchaseParams
 import ru.rustore.sdk.pay.model.Quantity
+import ru.rustore.sdk.pay.model.UserAuthorizationStatus
+//import ru.rustore.sdk.pay.model.UserAuthorizationStatus
 
 class RustorePayPlugin : CordovaPlugin() {
 
@@ -252,15 +254,44 @@ class RustorePayPlugin : CordovaPlugin() {
         try {
             helper.log("getUserAuthorizationStatus called")
 
-            // Add your method logic here
+            RuStorePayClient.instance.getUserInteractor().getUserAuthorizationStatus()
+                .addOnSuccessListener { status ->
+                    helper.log("getUserAuthorizationStatus success", "Status: $status")
 
-            helper.callbackSuccess(callbackContext, "getUserAuthorizationStatus executed successfully")
+                    val statusData = when (status) {
+                        UserAuthorizationStatus.AUTHORIZED -> {
+                            mapOf(
+                                "isAuthorized" to true,
+                                "status" to "authorized"
+                            )
+                        }
+                        UserAuthorizationStatus.UNAUTHORIZED -> {
+                            mapOf(
+                                "isAuthorized" to false,
+                                "status" to "unauthorized"
+                            )
+                        }
+                        else -> {
+                            mapOf(
+                                "isAuthorized" to false,
+                                "status" to "unknown"
+                            )
+                        }
+                    }
+
+                    helper.callbackSuccess(callbackContext, "User authorization status retrieved", statusData)
+                }
+                .addOnFailureListener { throwable ->
+                    helper.log("getUserAuthorizationStatus error", throwable.message)
+                    helper.callbackError(callbackContext, "getUserAuthorizationStatus error", throwable.message)
+                }
 
         } catch (e: Exception) {
             helper.log("getUserAuthorizationStatus error", e.message)
             helper.callbackError(callbackContext, "getUserAuthorizationStatus error", e.message)
         }
     }
+
 
     private fun getProducts(args: JSONArray, callbackContext: CallbackContext) {
         try {
