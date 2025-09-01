@@ -27,16 +27,42 @@
             <preference name="android-gradleVersion" value="8.13" />
             <preference name="android-minSdkVersion" value="23" />
             <preference name="GradlePluginKotlinEnabled" value="true" />
+            
+            <!-- RuStore allowed domains -->
+            <access origin="https://pay.rustore.ru" />
+            <access origin="https://api.rustore.ru" />
+            <access origin="https://console.rustore.ru" />
+            <access origin="https://artifactory-external.vkpartner.ru" />
+            <access origin="https://rustore.ru" />
+            <access origin="https://kbr.rustore.ru" />
         </config-file>
 
         <!-- Add your Android permissions here -->
-        <!--<config-file target="AndroidManifest.xml" parent="/manifest">-->
-            <!--<uses-permission android:name="android.permission.INTERNET" />-->
-        <!--</config-file>-->
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+            <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+            <uses-permission android:name="android.permission.BLUETOOTH" />
+        </config-file>
 
         <!-- Add your Android application config here -->
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
             <meta-data android:name="console_app_id_key" android:value="64612543" />
+            <meta-data android:name="sdk_pay_scheme_value" android:value="rustorepaydemo" />
+            
+            <!-- RuStore Pay Activity -->
+            <activity 
+                android:name="com.maximnara.rustore.pay.RustorePayActivity"
+                android:launchMode="singleTop"
+                android:exported="true">
+                <intent-filter>
+                    <action android:name="android.intent.action.VIEW" />
+                    <category android:name="android.intent.category.DEFAULT" />
+                    <category android:name="android.intent.category.BROWSABLE" />
+                    <data android:scheme="rustorepaydemo" />
+                </intent-filter>
+            </activity>
         </config-file>
 
         <source-file src="src/android" target-dir="java/com/maximnara/rustore/pay" />

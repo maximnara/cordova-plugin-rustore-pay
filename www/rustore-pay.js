@@ -141,6 +141,27 @@ let RustorePay = (function () {
                 callPlugin('getPurchaseAvailability', [params], resolve, reject);
             });
         },
+
+        /**
+         * getProducts
+         * @param {Object} params - method parameters
+         * @param {Array} params.productIds - array of product IDs to retrieve
+         * @param {Function} params.onSuccess - optional on success callback
+         * @param {Function} params.onFailure - optional on failure callback
+         */
+        getProducts: function getProducts(params)
+        {
+            return new Promise((resolve, reject) => {
+                params = defaults(params, {});
+
+                if (!params.productIds || !Array.isArray(params.productIds)) {
+                    reject(new Error('getProducts: productIds parameter is required and must be an array'));
+                    return;
+                }
+
+                callPlugin('getProducts', [params.productIds], resolve, reject);
+            });
+        },
     }
 })();
 
