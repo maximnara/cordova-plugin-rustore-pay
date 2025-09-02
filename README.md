@@ -1,147 +1,373 @@
-# Cordova Plugin Template
+# Cordova Plugin RuStore Pay
 
-Универсальный шаблон для создания Cordova плагинов с поддержкой Android (Kotlin) и iOS (Swift).
+Cordova плагин для интеграции с платежной системой RuStore. Позволяет осуществлять покупки внутри приложений, получать информацию о продуктах и управлять платежами через российский магазин приложений RuStore.
 
-## Как настроить шаблон
+## ☕ Поддержи разработку
 
-### 1. Скопируйте шаблон
-```bash
-git clone <your-template-repo> my-cordova-plugin
-cd my-cordova-plugin
-```
+Если этот плагин был полезен для вашего проекта, рассмотрите возможность поддержать разработку!
 
-### 2. Замените все плейсхолдеры
+[![Поддержать на Boosty](media/maximnara-donate.png)](https://boosty.to/maximnara/donate)
 
-Найдите и замените следующие плейсхолдеры на ваши значения:
+**[💖 Отправить донат через Boosty](https://boosty.to/maximnara/donate)**
 
-#### Основные плейсхолдеры:
-- `{{PLUGIN_ID}}` - ID плагина (например: `cordova-plugin-my-awesome-plugin`)
-- `{{PLUGIN_NAME}}` - Название плагина (например: `My Awesome Plugin`)
-- `{{PLUGIN_DESCRIPTION}}` - Описание плагина
-- `{{PLUGIN_NPM_NAME}}` - Название в NPM (например: `cordova-plugin-my-awesome-plugin`)
-- `{{PLUGIN_AUTHOR}}` - Ваше имя или название компании
-- `{{PLUGIN_KEYWORD}}` - Ключевое слово для поиска в NPM
-- `{{PLUGIN_REPOSITORY_URL}}` - URL репозитория (например: `https://github.com/username/cordova-plugin-my-awesome-plugin`)
+Ваша поддержка помогает развивать проект и создавать новые полезные инструменты для сообщества!
 
-#### JavaScript плейсхолдеры:
-- `{{JS_FILE_NAME}}` - Название JS файла (например: `my-awesome-plugin`)
-- `{{JS_MODULE_NAME}}` - Название модуля в JS (например: `MyAwesomePlugin`)
-- `{{JS_TARGET}}` - Глобальный объект в window (например: `MyAwesomePlugin`)
+## 📋 Содержание
 
-#### Android плейсхолдеры:
-- `{{ANDROID_PLUGIN_CLASS}}` - Название класса плагина (например: `MyAwesomePlugin`)
-- `{{ANDROID_PACKAGE}}` - Пакет Android (например: `com.yourcompany.plugin`)
-- `{{ANDROID_PACKAGE_PATH}}` - Путь пакета (например: `com/yourcompany/plugin`)
-- `{{GRADLE_FILE_NAME}}` - Название gradle файла (например: `my-awesome-plugin`)
+- [Демонстрация](#-демонстрация)
+- [Установка](#установка)
+- [Поддерживаемые платформы](#поддерживаемые-платформы)
+- [Быстрый старт](#быстрый-старт)
+- [API](#api)
+  - [Основные методы](#основные-методы)
+  - [Дополнительные методы](#дополнительные-методы)
+- [Примеры использования](#примеры-использования)
+- [Типы данных](#типы-данных)
+- [Обработка ошибок](#обработка-ошибок)
+- [Важные особенности](#️-важные-особенности)
+- [Требования](#требования)
+- [Лицензия](#лицензия)
 
-#### iOS плейсхолдеры:
-- `{{IOS_PLUGIN_CLASS}}` - Название класса iOS плагина (например: `MyAwesomePlugin`)
-
-### 3. Переименуйте файлы
-
-Переименуйте шаблонные файлы согласно вашему плагину:
+## 🚀 Установка
 
 ```bash
-# JavaScript
-mv www/plugin-template.js www/{{JS_FILE_NAME}}.js
-
-# Android
-mv src/android/PluginTemplate.kt src/android/{{ANDROID_PLUGIN_CLASS}}.kt
-mv src/android/build-template.gradle src/android/{{GRADLE_FILE_NAME}}.gradle
-
-# iOS
-mv src/ios/PluginTemplate.h src/ios/{{IOS_PLUGIN_CLASS}}.h
-mv src/ios/PluginTemplate.swift src/ios/{{IOS_PLUGIN_CLASS}}.swift
+cordova plugin add cordova-plugin-rustore-pay
 ```
 
-### 4. Добавьте свою логику
+## 📱 Поддерживаемые платформы
 
-#### JavaScript (www/{{JS_FILE_NAME}}.js):
-- Добавьте события плагина в объект `events`
-- Реализуйте методы плагина
-- Замените `exampleMethod` на ваши методы
+- Android
 
-#### Android (src/android/{{ANDROID_PLUGIN_CLASS}}.kt):
-- Добавьте ваши методы в `execute()`
-- Реализуйте логику для каждого метода
-- Добавьте необходимые зависимости в gradle файл
+## ⚡ Быстрый старт
 
-#### iOS (src/ios/{{IOS_PLUGIN_CLASS}}.swift):
-- Добавьте объявления методов в .h файл
-- Реализуйте методы в .swift файле
-- Добавьте CocoaPods зависимости если нужно
+### 1. Настройка после установки плагина
 
-### 5. Настройте plugin.xml
+⚠️ **ВАЖНО**: После установки плагина обязательно замените тестовые параметры на реальные в файле `plugins/cordova-plugin-rustore-pay/plugin.xml`:
 
-Раскомментируйте и настройте необходимые секции:
-- Android permissions
-- Android application config
-- Gradle dependencies
-- Framework dependencies
-- Resource files
-- iOS CocoaPods dependencies
-- iOS frameworks
+**Найдите и замените следующие параметры:**
 
-### 6. Установите и тестируйте
+```xml
+<!-- ЗАМЕНИТЕ НА РЕАЛЬНЫЙ ID ПРИЛОЖЕНИЯ ИЗ RUSTORE -->
+<meta-data android:name="console_app_id_value" android:value="12345678" />
 
-```bash
-# Добавьте плагин в ваш Cordova проект
-cordova plugin add /path/to/your/plugin
+<!-- DEEP LINK ПРИЛОЖЕНИЯ - замените на уникальную схему вашего приложения -->  
+<meta-data android:name="sdk_pay_scheme_value" android:value="com.demo.stand.pay" />
 
-# Или опубликуйте в NPM
-npm publish
-cordova plugin add your-plugin-name
+<!-- ЗАМЕНИТЕ НА РЕАЛЬНЫЙ ID ПРИЛОЖЕНИЯ ИЗ RUSTORE -->
+<string name="console_app_id_value">12345678</string>
 ```
 
-## Структура шаблона
+**На ваши реальные значения:**
 
-```
-cordova-plugin-template/
-├── plugin.xml                 # Конфигурация плагина
-├── package.json               # NPM пакет
-├── www/
-│   └── plugin-template.js     # JavaScript интерфейс
-├── src/
-│   ├── android/
-│   │   ├── PluginTemplate.kt      # Android реализация
-│   │   └── build-template.gradle  # Android зависимости
-│   └── ios/
-│       ├── PluginTemplate.h       # iOS заголовочный файл
-│       └── PluginTemplate.swift   # iOS реализация
-└── README.md                  # Эта инструкция
-```
+1. **App ID**: Получите в [RuStore Console](https://console.rustore.ru) → Можно найти в адресной строке
+2. **Deep Link схема**: Используйте уникальную схему вида `com.yourcompany.yourapp.pay`
 
-## Примеры замены
+### 2. Использование в коде
 
-### Пример 1: Плагин для камеры
-```
-{{PLUGIN_ID}} → cordova-plugin-awesome-camera
-{{PLUGIN_NAME}} → Awesome Camera Plugin
-{{JS_MODULE_NAME}} → AwesomeCamera
-{{ANDROID_PLUGIN_CLASS}} → AwesomeCameraPlugin
-{{ANDROID_PACKAGE}} → com.awesome.camera
-```
+```javascript
+// Проверка доступности платежей
+const purchasesAvailable = await RustorePay.getPurchaseAvailability({});
+if (!purchasesAvailable.available) {
+    console.error('Магазин RuStore не доступен');
+    return;
+}
 
-### Пример 2: Плагин для аналитики
-```
-{{PLUGIN_ID}} → cordova-plugin-my-analytics
-{{PLUGIN_NAME}} → My Analytics Plugin
-{{JS_MODULE_NAME}} → MyAnalytics
-{{ANDROID_PLUGIN_CLASS}} → MyAnalyticsPlugin
-{{ANDROID_PACKAGE}} → com.mycompany.analytics
+// Получение информации о продуктах
+const products = await RustorePay.getProducts({
+    productIds: ["premium_subscription", "coins_100"]
+});
+
+// Покупка продукта
+const purchase = await RustorePay.purchase({
+    productId: "premium_subscription",
+    quantity: 1
+});
+
+console.log("Покупка завершена:", purchase.purchaseId);
 ```
 
-## Возможности шаблона
+## 🎥 Демонстрация
 
-- ✅ Поддержка Android (Kotlin) и iOS (Swift)
-- ✅ Promise-based JavaScript API
-- ✅ Система событий
-- ✅ Обработка ошибок
-- ✅ Вспомогательные методы
-- ✅ Готовая структура для расширения
-- ✅ Современные версии Cordova (12.0+)
-- ✅ Комментированные секции для настройки
+Посмотрите, как работает плагин на практике:
 
-## Поддержка
+<video width="100%" controls>
+  <source src="media/demo.mp4" type="video/mp4">
+  Ваш браузер не поддерживает воспроизведение видео. <a href="media/demo.mp4">Скачать видео</a>
+</video>
 
-Если у вас есть вопросы или предложения по улучшению шаблона, создайте issue в репозитории.
+*Видео показывает основные функции плагина: получение продуктов, совершение покупки и получение списка покупок.*
+
+## 📚 API
+
+### Основные методы
+
+### 🛒 `purchase(params)`
+
+Осуществляет покупку продукта через RuStore.
+
+**Параметры:**
+```typescript
+{
+  productId: string;    // ID продукта (обязательный)
+  quantity?: number;    // Количество (по умолчанию: 1)
+}
+```
+
+**Возвращает:**
+```typescript
+Promise<{
+  purchaseId: string;   // ID покупки
+  productId: string;    // ID продукта
+  invoiceId: string;    // ID счета
+}>
+```
+
+**Пример:**
+```javascript
+try {
+    const result = await RustorePay.purchase({
+        productId: "premium_subscription",
+        quantity: 1
+    });
+    console.log("Покупка успешна:", result.purchaseId);
+} catch (error) {
+    console.error("Ошибка покупки:", error);
+}
+```
+
+### 📦 `getProducts(params)`
+
+Получает информацию о продуктах из RuStore.
+
+**Параметры:**
+```typescript
+{
+  productIds: string[]; // Массив ID продуктов (обязательный)
+}
+```
+
+**Возвращает:**
+```typescript
+Promise<{
+  products: Array<{
+    productId: string;    // ID продукта
+    type: string;         // Тип продукта
+    amountLabel: string;  // Отформатированная цена
+    price: number;        // Цена в копейках
+    currency: string;     // Валюта
+    imageUrl: string;     // URL изображения
+    title: string;        // Название
+    description: string;  // Описание
+  }>
+}>
+```
+
+**Пример:**
+```javascript
+const result = await RustorePay.getProducts({
+    productIds: ["premium", "coins_100", "remove_ads"]
+});
+
+result.products.forEach(product => {
+    console.log(`${product.title}: ${product.amountLabel}`);
+});
+```
+
+### 🧾 `getPurchases()`
+
+Получает список всех покупок пользователя.
+
+**Возвращает:**
+```typescript
+Promise<{
+  purchases: Array<{
+    purchaseId: string;      // ID покупки
+    invoiceId: string;       // ID счета
+    description: string;     // Описание
+    purchaseTime: number;    // Время покупки (timestamp)
+    orderId: string;         // ID заказа
+    amountLabel: string;     // Сумма
+    currency: string;        // Валюта
+    developerPayload: string; // Дополнительные данные
+  }>
+}>
+```
+
+**Пример:**
+```javascript
+const result = await RustorePay.getPurchases({});
+console.log(`Найдено покупок: ${result.purchases.length}`);
+
+result.purchases.forEach(purchase => {
+    const date = new Date(purchase.purchaseTime);
+    console.log(`${purchase.purchaseId}: ${purchase.amountLabel} (${date})`);
+});
+```
+
+### Дополнительные методы
+
+### 👤 `getUserAuthorizationStatus()`
+Получает статус авторизации пользователя в RuStore.
+
+### ✅ `getPurchaseAvailability()`
+Проверяет доступность платежей.
+
+### 📱 `openRuStore()`
+Открывает приложение RuStore.
+
+### 📥 `openRuStoreDownloadInstruction()`
+Показывает инструкцию по установке RuStore.
+
+## 💡 Примеры использования
+
+### Проверка доступности платежей
+
+```javascript
+const availability = await RustorePay.getPurchaseAvailability({});
+if (availability.available) {
+    console.log("Платежи доступны");
+} else {
+    console.error("Платежи недоступны:", availability.error);
+}
+```
+
+### Покупка с обработкой ошибок
+
+```javascript
+async function buyPremium() {
+    try {
+        // Проверяем авторизацию
+        const auth = await RustorePay.getUserAuthorizationStatus({});
+        if (!auth.isAuthorized) {
+            console.error("Пользователь не авторизован в RuStore");
+            return;
+        }
+
+        // Получаем информацию о продукте
+        const products = await RustorePay.getProducts({
+            productIds: ["premium_subscription"]
+        });
+        
+        if (products.products.length === 0) {
+            throw new Error("Продукт не найден");
+        }
+
+        // Совершаем покупку
+        const purchase = await RustorePay.purchase({
+            productId: "premium_subscription"
+        });
+
+        console.log("Премиум активирован:", purchase.purchaseId);
+        
+    } catch (error) {
+        console.error("Ошибка покупки:", error);
+    }
+}
+```
+
+### Восстановление покупок
+
+```javascript
+async function restorePurchases() {
+    try {
+        const result = await RustorePay.getPurchases({});
+        
+        const premiumPurchases = result.purchases.filter(p => 
+            p.description.includes("premium")
+        );
+        
+        if (premiumPurchases.length > 0) {
+            console.log("Премиум подписка найдена");
+            activatePremiumFeatures();
+        }
+        
+    } catch (error) {
+        console.error("Ошибка восстановления:", error);
+    }
+}
+```
+
+## 📊 Типы данных
+
+### Типы продуктов
+- `CONSUMABLE_PRODUCT` - Расходуемый товар
+- `NON_CONSUMABLE_PRODUCT` - Нерасходуемый товар  
+- `SUBSCRIPTION` - Подписка
+
+### Статусы авторизации
+- `authorized` - Пользователь авторизован
+- `unauthorized` - Пользователь не авторизован
+- `unknown` - Неизвестный статус
+
+## ⚠️ Обработка ошибок
+
+Все методы плагина возвращают Promise и могут генерировать ошибки. Рекомендуется всегда использовать try/catch блоки:
+
+```javascript
+try {
+    const result = await RustorePay.purchase({productId: "test"});
+    // Обработка успешной покупки
+} catch (error) {
+    // Обработка ошибок
+    console.error("Ошибка:", error.message);
+}
+```
+
+Типичные ошибки:
+- RuStore не установлен на устройстве
+- Пользователь не авторизован
+- Продукт не найден
+- Платежи недоступны
+- Пользователь отменил покупку
+
+## ⚠️ Важные особенности
+
+### Подпись приложения
+- **Платежи НЕ работают в debug версии приложения**
+- Подпись вашего APK должна точно совпадать с подписью, загруженной в RuStore Console
+- Для тестирования используйте только release-сборки с правильной подписью
+- Подробнее: [Проверка подписи приложения](https://www.rustore.ru/help/guides/check-sign)
+
+### Полезные ссылки
+- [Тестирование платежного SDK](https://www.rustore.ru/help/developers/monetization/sandbox/testing-sdk-pay)
+- [Включение тестового режима](https://www.rustore.ru/help/developers/monetization/sandbox/enable-test-mode) 
+- [Работа без приложения RuStore](https://www.rustore.ru/help/developers/monetization/without-rustore-app#vk-id) 
+
+## 📋 Требования
+
+- **Android**: API Level 21+ (Android 5.0+)
+- **RuStore**: Должен быть установлен на устройстве
+- **Cordova**: 9.0.0+
+- **cordova-android**: 8.0.0+
+
+## 🤝 Поддержка
+
+Если у вас возникли вопросы или проблемы:
+
+1. Проверьте [Issues](../../issues) на GitHub
+2. Создайте новый Issue с описанием проблемы
+3. Приложите логи и код для воспроизведения
+
+## 📄 Лицензия
+
+MIT License
+
+## ☕ Понравился проект? Поддержи разработчика!
+
+Разработка и поддержка плагинов требует времени и усилий. Если проект оказался полезным, буду благодарен за поддержку!
+
+<div align="center">
+
+[![Поддержать на Boosty](media/maximnara-donate.png)](https://boosty.to/maximnara/donate)
+
+**[💖 Отправить донат через Boosty](https://boosty.to/maximnara/donate)**
+
+*Каждый донат мотивирует на создание новых полезных инструментов!*
+
+</div>
+
+---
+
+<p align="center">
+  Сделано с ❤️ для российских разработчиков
+</p>

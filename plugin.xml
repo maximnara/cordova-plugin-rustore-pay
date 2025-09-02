@@ -19,16 +19,15 @@
     </engines>
 
     <platform name="android">
-
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="RustorePayPlugin">
                 <param name="android-package" value="com.maximnara.rustore.pay.RustorePayPlugin" />
             </feature>
             <preference name="android-gradleVersion" value="8.13" />
             <preference name="android-minSdkVersion" value="23" />
+            <preference name="android-compileSdkVersion" value="34" />
             <preference name="GradlePluginKotlinEnabled" value="true" />
-            
-            <!-- RuStore allowed domains -->
+
             <access origin="https://pay.rustore.ru" />
             <access origin="https://api.rustore.ru" />
             <access origin="https://console.rustore.ru" />
@@ -37,7 +36,6 @@
             <access origin="https://kbr.rustore.ru" />
         </config-file>
 
-        <!-- Add your Android permissions here -->
         <config-file target="AndroidManifest.xml" parent="/manifest">
             <uses-permission android:name="android.permission.INTERNET" />
             <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -46,63 +44,34 @@
             <uses-permission android:name="android.permission.BLUETOOTH" />
         </config-file>
 
-        <!-- Add your Android application config here -->
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
-            <meta-data android:name="console_app_id_key" android:value="64612543" />
-            <meta-data android:name="sdk_pay_scheme_value" android:value="rustorepaydemo" />
-            
-            <!-- RuStore Pay Activity -->
+            <!-- ЗАМЕНИТЕ НА РЕАЛЬНЫЙ ID ПРИЛОЖЕНИЯ ИЗ RUSTORE -->
+            <meta-data android:name="console_app_id_value" android:value="{{НУЖНО ЗАМЕНИТЬ}}" />
+            <!-- DEEP LINK ПРИЛОЖЕНИЯ -->
+            <meta-data android:name="sdk_pay_scheme_value" android:value="{{НУЖНО ЗАМЕНИТЬ}}.pay" />
+            <!-- Включает тестовый режим платежей -->
+            <meta-data android:name="ru_store_test_mode" android:value="true" />
+
             <activity 
                 android:name="com.maximnara.rustore.pay.RustorePayActivity"
                 android:launchMode="singleTop"
-                android:exported="true">
+                android:exported="true"
+                android:theme="@android:style/Theme.Translucent.NoTitleBar">
                 <intent-filter>
                     <action android:name="android.intent.action.VIEW" />
                     <category android:name="android.intent.category.DEFAULT" />
                     <category android:name="android.intent.category.BROWSABLE" />
-                    <data android:scheme="rustorepaydemo" />
+                    <data android:scheme="{{НУЖНО ЗАМЕНИТЬ}}.pay" />
                 </intent-filter>
             </activity>
         </config-file>
 
         <source-file src="src/android" target-dir="java/com/maximnara/rustore/pay" />
-        
-        <!-- Add your gradle dependencies here -->
         <framework src="src/android/rustore-pay.gradle" custom="true" type="gradleReference" />
 
-        <!-- Add your framework dependencies here -->
-        <!--<framework src="com.android.support:support-v4:+" />-->
-
-        <!-- Add your resource files here -->
-        <!--<resource-file src="src/android/example.xml" target="res/values/example.xml" />-->
-    </platform>
-
-    <platform name="ios">
-        <config-file target="config.xml" parent="/*">
-            <feature name="RustorePayPlugin">
-                <param name="ios-package" value="RustorePayPlugin" />
-            </feature>
-            <preference name="SwiftVersion" value="5.8" />
-            <preference name="deployment-target" value="13.0" />
-            <preference name="IPHONEOS_DEPLOYMENT_TARGET" value="13.0" />
-            <preference name="ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES" value="YES" />
+        <config-file target="res/values/strings.xml" parent="/*">
+            <!-- ЗАМЕНИТЕ НА РЕАЛЬНЫЙ ID ПРИЛОЖЕНИЯ ИЗ RUSTORE -->
+            <string name="console_app_id_value">{{НУЖНО ЗАМЕНИТЬ}}</string>
         </config-file>
-
-        <!-- Add your iOS source files here -->
-        <source-file src="src/ios/RustorePayPlugin.swift" />
-        <header-file src="src/ios/RustorePayPlugin.h" />
-
-        <!-- Add your CocoaPods dependencies here -->
-        <!--<podspec>-->
-            <!--<config>-->
-                <!--<source url="https://cdn.cocoapods.org/"/>-->
-            <!--</config>-->
-            <!--<pods use-frameworks="true">-->
-                <!--<pod name="ExampleSDK" spec="~> 1.0.0" />-->
-            <!--</pods>-->
-        <!--</podspec>-->
-
-        <!-- Add your iOS frameworks here -->
-        <!--<framework src="ExampleSDK.framework" />-->
     </platform>
 </plugin>

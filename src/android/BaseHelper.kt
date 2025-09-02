@@ -5,12 +5,15 @@ import org.apache.cordova.CallbackContext
 import org.apache.cordova.CordovaPlugin
 import org.apache.cordova.CordovaWebView
 import org.json.JSONObject
+import org.json.JSONArray
+import com.google.gson.Gson
 
 internal abstract class BaseHelper(
     protected val cordovaPlugin: CordovaPlugin,
     protected val cordovaWebView: CordovaWebView
 ) {
     protected val cordova = cordovaPlugin.cordova
+    private val gson = Gson()
 
     companion object {
         private const val FIRE_WINDOW_EVENT = "javascript:cordova.fireWindowEvent('%s');"
@@ -65,7 +68,36 @@ internal abstract class BaseHelper(
         result.put("success", true)
         result.put("message", message)
         if (data != null) {
-            result.put("data", data)
+            // Convert data to JSONObject/JSONArray for proper JSON structure
+            val jsonData = when (data) {
+                is JSONObject -> data
+                is JSONArray -> data
+                is String -> {
+                    try {
+                        JSONObject(data)
+                    } catch (e: Exception) {
+                        try {
+                            JSONArray(data)
+                        } catch (e2: Exception) {
+                            data // Keep as string if not valid JSON
+                        }
+                    }
+                }
+                else -> {
+                    // Convert object to JSON string then parse back to JSONObject/JSONArray
+                    val jsonString = gson.toJson(data)
+                    try {
+                        JSONObject(jsonString)
+                    } catch (e: Exception) {
+                        try {
+                            JSONArray(jsonString)
+                        } catch (e2: Exception) {
+                            jsonString // Fallback to string
+                        }
+                    }
+                }
+            }
+            result.put("data", jsonData)
         }
         return result
     }
@@ -80,7 +112,36 @@ internal abstract class BaseHelper(
         result.put("success", false)
         result.put("message", message)
         if (error != null) {
-            result.put("error", error)
+            // Convert error to JSONObject/JSONArray for proper JSON structure
+            val jsonError = when (error) {
+                is JSONObject -> error
+                is JSONArray -> error
+                is String -> {
+                    try {
+                        JSONObject(error)
+                    } catch (e: Exception) {
+                        try {
+                            JSONArray(error)
+                        } catch (e2: Exception) {
+                            error // Keep as string if not valid JSON
+                        }
+                    }
+                }
+                else -> {
+                    // Convert object to JSON string then parse back to JSONObject/JSONArray
+                    val jsonString = gson.toJson(error)
+                    try {
+                        JSONObject(jsonString)
+                    } catch (e: Exception) {
+                        try {
+                            JSONArray(jsonString)
+                        } catch (e2: Exception) {
+                            jsonString // Fallback to string
+                        }
+                    }
+                }
+            }
+            result.put("error", jsonError)
         }
         return result
     }

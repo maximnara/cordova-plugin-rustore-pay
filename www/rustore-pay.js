@@ -1,6 +1,4 @@
 let RustorePay = (function () {
-    let initialized = false;
-
     return {
         events: {
             // Define your plugin events here
@@ -10,51 +8,11 @@ let RustorePay = (function () {
             // }
         },
 
-        /**
-         * Returns the state of initialization
-         */
-        isInitialized: function isInitialized()
-        {
-            return initialized;
-        },
 
-        /**
-         * Initializes the plugin
-         * @param {Object} params - initialization parameters
-         * @param {Function} params.onSuccess - optional on success callback
-         * @param {Function} params.onFailure - optional on failure callback
-         */
-        init: function init(params)
-        {
-            return new Promise((resolve, reject) => {
-                params = defaults(params, {});
-
-                // Add your validation logic here
-                // if (params.hasOwnProperty('requiredParam') === false)
-                // {
-                //     throw new Error('RustorePay::init - requiredParam is required');
-                // }
-
-                callPlugin(
-                    'init',
-                    [
-                        // Add your initialization parameters here
-                        params.options || {},
-                    ],
-                    function () {
-                        initialized = true;
-                        resolve();
-                    },
-                    reject
-                );
-            });
-        },
 
         /**
          * Example method - replace with your plugin methods
          * @param {Object} params - method parameters
-         * @param {Function} params.onSuccess - optional on success callback
-         * @param {Function} params.onFailure - optional on failure callback
          */
         exampleMethod: function exampleMethod(params)
         {
@@ -70,8 +28,6 @@ let RustorePay = (function () {
         /**
          * getUserAuthorizationStatus
          * @param {Object} params - method parameters
-         * @param {Function} params.onSuccess - optional on success callback
-         * @param {Function} params.onFailure - optional on failure callback
          */
         getUserAuthorizationStatus: function getUserAuthorizationStatus(params)
         {
@@ -85,38 +41,37 @@ let RustorePay = (function () {
         /**
          * purchase
          * @param {Object} params - method parameters
-         * @param {Function} params.onSuccess - optional on success callback
-         * @param {Function} params.onFailure - optional on failure callback
+         * @param {string} params.productId - product ID to purchase (required)
+         * @param {number} params.quantity - quantity to purchase (optional, default: 1)
          */
         purchase: function purchase(params)
         {
             return new Promise((resolve, reject) => {
                 params = defaults(params, {});
 
+                if (!params.productId || typeof params.productId !== 'string' || params.productId.trim() === '') {
+                    reject(new Error('purchase: productId parameter is required and must be a non-empty string'));
+                    return;
+                }
+
+                if (params.quantity !== undefined && (!Number.isInteger(params.quantity) || params.quantity < 1)) {
+                    reject(new Error('purchase: quantity parameter must be a positive integer'));
+                    return;
+                }
+
+                // Устанавливаем значение по умолчанию для quantity если не указано
+                if (params.quantity === undefined) {
+                    params.quantity = 1;
+                }
+
                 callPlugin('purchase', [params], resolve, reject);
             });
         },
 
-        /**
-         * getPurchase
-         * @param {Object} params - method parameters
-         * @param {Function} params.onSuccess - optional on success callback
-         * @param {Function} params.onFailure - optional on failure callback
-         */
-        getPurchase: function getPurchase(params)
-        {
-            return new Promise((resolve, reject) => {
-                params = defaults(params, {});
-
-                callPlugin('getPurchase', [params], resolve, reject);
-            });
-        },
 
         /**
          * getPurchases
          * @param {Object} params - method parameters
-         * @param {Function} params.onSuccess - optional on success callback
-         * @param {Function} params.onFailure - optional on failure callback
          */
         getPurchases: function getPurchases(params)
         {
@@ -130,8 +85,6 @@ let RustorePay = (function () {
         /**
          * getPurchaseAvailability
          * @param {Object} params - method parameters
-         * @param {Function} params.onSuccess - optional on success callback
-         * @param {Function} params.onFailure - optional on failure callback
          */
         getPurchaseAvailability: function getPurchaseAvailability(params)
         {
@@ -143,12 +96,12 @@ let RustorePay = (function () {
         },
 
 
+
+
         /**
          * getProducts
          * @param {Object} params - method parameters
          * @param {Array} params.productIds - array of product IDs to retrieve
-         * @param {Function} params.onSuccess - optional on success callback
-         * @param {Function} params.onFailure - optional on failure callback
          */
         getProducts: function getProducts(params)
         {
@@ -163,6 +116,33 @@ let RustorePay = (function () {
                 callPlugin('getProducts', [params.productIds], resolve, reject);
             });
         },
+
+        /**
+         * openRuStoreDownloadInstruction
+         * @param {Object} params - method parameters
+         */
+        openRuStoreDownloadInstruction: function openRuStoreDownloadInstruction(params)
+        {
+            return new Promise((resolve, reject) => {
+                params = defaults(params, {});
+
+                callPlugin('openRuStoreDownloadInstruction', [params], resolve, reject);
+            });
+        },
+
+        /**
+         * openRuStore
+         * @param {Object} params - method parameters
+         */
+        openRuStore: function openRuStore(params)
+        {
+            return new Promise((resolve, reject) => {
+                params = defaults(params, {});
+
+                callPlugin('openRuStore', [params], resolve, reject);
+            });
+        },
+
     }
 })();
 
