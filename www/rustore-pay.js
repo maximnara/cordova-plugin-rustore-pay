@@ -1,30 +1,31 @@
 let RustorePay = (function () {
+    // Constants for product types
+    const PRODUCT_TYPES = {
+        CONSUMABLE: 'CONSUMABLE',
+        NON_CONSUMABLE: 'NON_CONSUMABLE',
+        SUBSCRIPTION: 'SUBSCRIPTION'
+    };
+
+    // Purchase statuses for consumable and non-consumable products
+    const PRODUCT_PURCHASE_STATUSES = [
+        'INVOICE_CREATED',
+        'PAID',
+        'CONFIRMED',
+        'CANCELLED',
+        'REFUNDED',
+        'REJECTED'
+    ];
+
+    // Purchase statuses for subscription products
+    const SUBSCRIPTION_PURCHASE_STATUSES = [
+        'INVOICE_CREATED',
+        'ACTIVE',
+        'CANCELLED',
+        'PAUSED',
+        'EXPIRED'
+    ];
+
     return {
-        events: {
-            // Define your plugin events here
-            // example: {
-            //     loaded: 'exampleDidLoad',
-            //     failed: 'exampleDidFail',
-            // }
-        },
-
-
-
-        /**
-         * Example method - replace with your plugin methods
-         * @param {Object} params - method parameters
-         */
-        exampleMethod: function exampleMethod(params)
-        {
-            return new Promise((resolve, reject) => {
-                params = defaults(params, {});
-
-                callPlugin('exampleMethod', [params.value], resolve, reject);
-            });
-        },
-
-        // Add your plugin methods here
-
         /**
          * getUserAuthorizationStatus
          * @param {Object} params - method parameters
@@ -72,11 +73,47 @@ let RustorePay = (function () {
         /**
          * getPurchases
          * @param {Object} params - method parameters
+         * @param {string} params.productType - product type to filter (optional)
+         *                                      Possible values: 'CONSUMABLE', 'NON_CONSUMABLE', 'SUBSCRIPTION'
+         * @param {string} params.purchaseStatus - purchase status to filter (optional, requires productType)
+         *                                         For CONSUMABLE/NON_CONSUMABLE: 'CREATED', 'INVOICE_CREATED', 'PAID', 'CONFIRMED', 'CONSUMED', 'CANCELLED', 'REFUNDED', 'REJECTED'
+         *                                         For SUBSCRIPTION: 'CREATED', 'INVOICE_CREATED', 'ACTIVE', 'CANCELLED', 'ON_HOLD', 'PAUSED', 'EXPIRED'
          */
         getPurchases: function getPurchases(params)
         {
             return new Promise((resolve, reject) => {
                 params = defaults(params, {});
+
+                // Validate productType if provided
+                if (params.productType !== undefined) {
+                    const validProductTypes = Object.values(PRODUCT_TYPES);
+                    if (!validProductTypes.includes(params.productType)) {
+                        reject(new Error(`getPurchases: invalid productType '${params.productType}'. Valid values are: ${validProductTypes.join(', ')}`));
+                        return;
+                    }
+                }
+
+                // Validate purchaseStatus if provided
+                if (params.purchaseStatus !== undefined) {
+                    // purchaseStatus requires productType to be specified
+                    if (!params.productType) {
+                        reject(new Error('getPurchases: purchaseStatus can only be used when productType is specified'));
+                        return;
+                    }
+
+                    let validStatuses;
+                    if (params.productType === PRODUCT_TYPES.SUBSCRIPTION) {
+                        validStatuses = SUBSCRIPTION_PURCHASE_STATUSES;
+                    } else {
+                        // CONSUMABLE or NON_CONSUMABLE
+                        validStatuses = PRODUCT_PURCHASE_STATUSES;
+                    }
+
+                    if (!validStatuses.includes(params.purchaseStatus)) {
+                        reject(new Error(`getPurchases: invalid purchaseStatus '${params.purchaseStatus}' for productType '${params.productType}'. Valid values are: ${validStatuses.join(', ')}`));
+                        return;
+                    }
+                }
 
                 callPlugin('getPurchases', [params], resolve, reject);
             });

@@ -170,7 +170,75 @@ class RustorePayPlugin : CordovaPlugin() {
 
             val purchaseInteractor = RuStorePayClient.instance.getPurchaseInteractor()
 
-            purchaseInteractor.getPurchases()
+            // Parse filter parameters if provided (single values, not arrays)
+            var productType: ProductType? = null
+            var purchaseStatus: Any? = null // Can be ProductPurchaseStatus or SubscriptionPurchaseStatus
+
+            if (args.length() > 0) {
+                val params = args.getJSONObject(0)
+
+                // Parse productType (single value)
+                if (params.has("productType")) {
+                    val typeString = params.getString("productType")
+                    productType = when (typeString) {
+                        "CONSUMABLE" -> ProductType.CONSUMABLE_PRODUCT
+                        "NON_CONSUMABLE" -> ProductType.NON_CONSUMABLE_PRODUCT
+                        "SUBSCRIPTION" -> ProductType.SUBSCRIPTION
+                        else -> null
+                    }
+                }
+
+                // Parse purchaseStatus only if productType is specified
+                if (params.has("purchaseStatus")) {
+                    if (productType == null) {
+                        helper.log("getPurchases warning", "purchaseStatus can only be used when productType is specified")
+                        helper.callbackError(callbackContext, "getPurchases error", "purchaseStatus can only be used when productType is specified")
+                        return
+                    }
+
+                    val statusString = params.getString("purchaseStatus")
+
+                    // Use appropriate status enum based on product type
+                    purchaseStatus = when (productType) {
+                        ProductType.CONSUMABLE_PRODUCT, ProductType.NON_CONSUMABLE_PRODUCT -> {
+                            when (statusString) {
+                                "INVOICE_CREATED" -> ru.rustore.sdk.pay.model.ProductPurchaseStatus.INVOICE_CREATED
+                                "PAID" -> ru.rustore.sdk.pay.model.ProductPurchaseStatus.PAID
+                                "CONFIRMED" -> ru.rustore.sdk.pay.model.ProductPurchaseStatus.CONFIRMED
+                                "CANCELLED" -> ru.rustore.sdk.pay.model.ProductPurchaseStatus.CANCELLED
+                                "REFUNDED" -> ru.rustore.sdk.pay.model.ProductPurchaseStatus.REFUNDED
+                                "REJECTED" -> ru.rustore.sdk.pay.model.ProductPurchaseStatus.REJECTED
+                                else -> {
+                                    helper.log("getPurchases warning", "Invalid purchaseStatus for product type: $statusString")
+                                    null
+                                }
+                            }
+                        }
+                        ProductType.SUBSCRIPTION -> {
+                            when (statusString) {
+                                "INVOICE_CREATED" -> ru.rustore.sdk.pay.model.SubscriptionPurchaseStatus.INVOICE_CREATED
+                                "ACTIVE" -> ru.rustore.sdk.pay.model.SubscriptionPurchaseStatus.ACTIVE
+                                "CANCELLED" -> ru.rustore.sdk.pay.model.SubscriptionPurchaseStatus.CANCELLED
+                                "PAUSED" -> ru.rustore.sdk.pay.model.SubscriptionPurchaseStatus.PAUSED
+                                "EXPIRED" -> ru.rustore.sdk.pay.model.SubscriptionPurchaseStatus.EXPIRED
+                                else -> {
+                                    helper.log("getPurchases warning", "Invalid purchaseStatus for subscription: $statusString")
+                                    null
+                                }
+                            }
+                        }
+                        else -> null
+                    }
+                }
+            }
+
+            helper.log("getPurchases", "Filters - productType: $productType, purchaseStatus: $purchaseStatus")
+
+            // Call getPurchases with filters
+            purchaseInteractor.getPurchases(
+                productType = productType,
+                purchaseStatus = purchaseStatus as? ru.rustore.sdk.pay.model.PurchaseStatus
+            )
                 .addOnSuccessListener { purchases ->
                     helper.log("getPurchases success", "Retrieved ${purchases.size} purchases")
 

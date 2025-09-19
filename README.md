@@ -2,19 +2,7 @@
 
 Cordova плагин для интеграции с платежной системой RuStore. Позволяет осуществлять покупки внутри приложений, получать информацию о продуктах и управлять платежами через российский магазин приложений RuStore.
 
-## ☕ Поддержи разработку
-
-Если этот плагин был полезен для вашего проекта, рассмотрите возможность поддержать разработку!
-
-[![Поддержать на Boosty](media/maximnara-donate.png)](https://boosty.to/maximnara/donate)
-
-**[💖 Отправить донат через Boosty](https://boosty.to/maximnara/donate)**
-
-Ваша поддержка помогает развивать проект и создавать новые полезные инструменты для сообщества!
-
 ## 📋 Содержание
-
-- [Демонстрация](#-демонстрация)
 - [Установка](#установка)
 - [Поддерживаемые платформы](#поддерживаемые-платформы)
 - [Быстрый старт](#быстрый-старт)
@@ -25,13 +13,11 @@ Cordova плагин для интеграции с платежной сист�
 - [Типы данных](#типы-данных)
 - [Обработка ошибок](#обработка-ошибок)
 - [Важные особенности](#️-важные-особенности)
-- [Требования](#требования)
-- [Лицензия](#лицензия)
 
 ## 🚀 Установка
 
 ```bash
-cordova plugin add cordova-plugin-rustore-pay
+cordova plugin add ../cordova-plugin-rustore-pay/
 ```
 
 ## 📱 Поддерживаемые платформы
@@ -73,9 +59,7 @@ if (!purchasesAvailable.available) {
 }
 
 // Получение информации о продуктах
-const products = await RustorePay.getProducts({
-    productIds: ["premium_subscription", "coins_100"]
-});
+const products = await RustorePay.getProducts(...);
 
 // Покупка продукта
 const purchase = await RustorePay.purchase({
@@ -170,15 +154,25 @@ result.products.forEach(product => {
 });
 ```
 
-### 🧾 `getPurchases()`
+### 🧾 `getPurchases(params)`
 
-Получает список всех покупок пользователя.
+Получает список покупок пользователя с возможностью фильтрации.
+
+**Параметры (опциональные):**
+```typescript
+{
+  productType?: string;     // Тип продукта для фильтрации
+  purchaseStatus?: string;  // Статус покупки (требует указания productType)
+}
+```
 
 **Возвращает:**
 ```typescript
 Promise<{
   purchases: Array<{
     purchaseId: string;      // ID покупки
+    productId: string;       // ID продукта
+    productType: string;     // Тип продукта
     invoiceId: string;       // ID счета
     description: string;     // Описание
     purchaseTime: number;    // Время покупки (timestamp)
@@ -186,18 +180,89 @@ Promise<{
     amountLabel: string;     // Сумма
     currency: string;        // Валюта
     developerPayload: string; // Дополнительные данные
+    purchaseStatus: string;  // Статус покупки
   }>
 }>
 ```
 
-**Пример:**
-```javascript
-const result = await RustorePay.getPurchases({});
-console.log(`Найдено покупок: ${result.purchases.length}`);
+**Фильтрация:**
 
-result.purchases.forEach(purchase => {
+Метод поддерживает фильтрацию покупок по типу продукта и статусу:
+
+1. **По типу продукта** (`productType`):
+   - `CONSUMABLE` - расходуемые товары
+   - `NON_CONSUMABLE` - нерасходуемые товары
+   - `SUBSCRIPTION` - подписки
+
+2. **По статусу покупки** (`purchaseStatus`):
+
+   ⚠️ **Важно:** Параметр `purchaseStatus` можно использовать только при указании `productType`, так как разные типы продуктов имеют разные статусы.
+
+   **Для CONSUMABLE и NON_CONSUMABLE:**
+   - `INVOICE_CREATED` - счёт создан
+   - `PAID` - оплачено
+   - `CONFIRMED` - подтверждено
+   - `CANCELLED` - отменено
+   - `REFUNDED` - возвращено
+   - `REJECTED` - отклонено
+
+   **Для SUBSCRIPTION:**
+   - `INVOICE_CREATED` - счёт создан
+   - `ACTIVE` - активна
+   - `CANCELLED` - отменена
+   - `PAUSED` - приостановлена
+   - `EXPIRED` - истекла
+
+**Примеры:**
+
+```javascript
+// Получить все покупки без фильтрации
+const allPurchases = await RustorePay.getPurchases({});
+console.log(`Всего покупок: ${allPurchases.purchases.length}`);
+
+// Получить только расходуемые товары
+const consumables = await RustorePay.getPurchases({
+    productType: 'CONSUMABLE'
+});
+
+// Получить только активные подписки
+const activeSubscriptions = await RustorePay.getPurchases({
+    productType: 'SUBSCRIPTION',
+    purchaseStatus: 'ACTIVE'
+});
+console.log(`Активных подписок: ${activeSubscriptions.purchases.length}`);
+
+// Получить оплаченные нерасходуемые товары
+const paidNonConsumables = await RustorePay.getPurchases({
+    productType: 'NON_CONSUMABLE',
+    purchaseStatus: 'PAID'
+});
+
+// Обработка результатов
+allPurchases.purchases.forEach(purchase => {
     const date = new Date(purchase.purchaseTime);
-    console.log(`${purchase.purchaseId}: ${purchase.amountLabel} (${date})`);
+    console.log(`${purchase.productId} (${purchase.productType}): ${purchase.purchaseStatus}`);
+    console.log(`  Куплено: ${date.toLocaleDateString()}`);
+    console.log(`  Сумма: ${purchase.amountLabel}`);
+});
+```
+
+**Обработка ошибок:**
+
+```javascript
+try {
+    // Ошибка: purchaseStatus без productType
+    await RustorePay.getPurchases({
+        purchaseStatus: 'PAID' // ❌ Ошибка!
+    });
+} catch (error) {
+    console.error(error); // "purchaseStatus can only be used when productType is specified"
+}
+
+// Правильно:
+const purchases = await RustorePay.getPurchases({
+    productType: 'CONSUMABLE',
+    purchaseStatus: 'PAID' // ✅ OK
 });
 ```
 
@@ -337,34 +402,3 @@ try {
 - **Cordova**: 9.0.0+
 - **cordova-android**: 8.0.0+
 
-## 🤝 Поддержка
-
-Если у вас возникли вопросы или проблемы:
-
-1. Проверьте [Issues](../../issues) на GitHub
-2. Создайте новый Issue с описанием проблемы
-3. Приложите логи и код для воспроизведения
-
-## 📄 Лицензия
-
-MIT License
-
-## ☕ Понравился проект? Поддержи разработчика!
-
-Разработка и поддержка плагинов требует времени и усилий. Если проект оказался полезным, буду благодарен за поддержку!
-
-<div align="center">
-
-[![Поддержать на Boosty](media/maximnara-donate.png)](https://boosty.to/maximnara/donate)
-
-**[💖 Отправить донат через Boosty](https://boosty.to/maximnara/donate)**
-
-*Каждый донат мотивирует на создание новых полезных инструментов!*
-
-</div>
-
----
-
-<p align="center">
-  Сделано с ❤️ для российских разработчиков
-</p>

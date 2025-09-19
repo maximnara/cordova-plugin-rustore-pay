@@ -15,7 +15,7 @@ dependencies {
     // RuStore Pay SDK using BOM
     implementation platform('ru.rustore.sdk:bom:2025.08.01')
     implementation 'ru.rustore.sdk:pay'
-    
+
     // JSON serialization
     implementation 'com.google.code.gson:gson:2.10.1'
 }

@@ -1,5 +1,6 @@
 {
   "name": "cordova-plugin-rustore-pay",
+  "private": true,
   "version": "1.0.0",
   "description": "Cordova plugin for rustore-pay",
   "repository": {
@@ -14,7 +15,6 @@
     "rustore-pay"
   ],
   "author": "luzhkov",
-  "license": "MIT",
   "cordova": {
     "id": "cordova-plugin-rustore-pay",
     "platforms": [
