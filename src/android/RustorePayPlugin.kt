@@ -140,7 +140,7 @@ class RustorePayPlugin : CordovaPlugin() {
                                 "available" to true,
                                 "status" to "available"
                             )
-                            helper.callbackSuccess(callbackContext, "Purchase availability check successful", data)
+                            helper.callbackSuccessRaw(callbackContext, data)
                         }
                         is PurchaseAvailabilityResult.Unavailable -> {
                             helper.log("Purchase availability check failed", result.cause?.message ?: "Unknown error")
@@ -149,7 +149,7 @@ class RustorePayPlugin : CordovaPlugin() {
                                 "status" to "unavailable",
                                 "error" to (result.cause?.message ?: "Unknown error")
                             )
-                            helper.callbackSuccess(callbackContext, "Purchase availability check completed", data)
+                            helper.callbackSuccessRaw(callbackContext, data)
                         }
                     }
                 }
@@ -247,17 +247,17 @@ class RustorePayPlugin : CordovaPlugin() {
                     for (purchase in purchases) {
                         // Общие поля для всех типов покупок (из общего интерфейса)
                         val purchaseMap = mutableMapOf<String, Any?>(
-                            "purchaseId" to purchase.purchaseId,
-                            "invoiceId" to purchase.invoiceId,
+                            "purchaseId" to purchase.purchaseId.value,
+                            "invoiceId" to purchase.invoiceId.value,
                             "purchaseTime" to purchase.purchaseTime?.time,
-                            "orderId" to purchase.orderId,
+                            "orderId" to purchase.orderId?.value,
                             "purchaseType" to purchase.purchaseType.toString(),
-                            "description" to purchase.description,
-                            "amountLabel" to purchase.amountLabel,
-                            "price" to purchase.price,
-                            "currency" to purchase.currency,
+                            "description" to purchase.description.value,
+                            "amountLabel" to purchase.amountLabel.value,
+                            "price" to purchase.price.value,
+                            "currency" to purchase.currency.value,
                             "status" to purchase.status.toString(),
-                            "developerPayload" to purchase.developerPayload,
+                            "developerPayload" to purchase.developerPayload?.value,
                             "sandbox" to purchase.sandbox
                         )
 
@@ -265,14 +265,14 @@ class RustorePayPlugin : CordovaPlugin() {
                         when (purchase) {
                             is ru.rustore.sdk.pay.model.ProductPurchase -> {
                                 // Специфичные поля для обычных продуктов (CONSUMABLE/NON_CONSUMABLE)
-                                purchaseMap["productId"] = purchase.productId
-                                purchaseMap["quantity"] = purchase.quantity
+                                purchaseMap["productId"] = purchase.productId.value
+                                purchaseMap["quantity"] = purchase.quantity.value
                                 purchaseMap["productType"] = purchase.productType.toString()
                                 purchaseMap["type"] = "PRODUCT" // Для идентификации типа
                             }
                             is ru.rustore.sdk.pay.model.SubscriptionPurchase -> {
                                 // Специфичные поля для подписок
-                                purchaseMap["productId"] = purchase.productId
+                                purchaseMap["productId"] = purchase.productId.value
                                 purchaseMap["expirationDate"] = purchase.expirationDate?.time
                                 purchaseMap["gracePeriodEnabled"] = purchase.gracePeriodEnabled
                                 purchaseMap["type"] = "SUBSCRIPTION" // Для идентификации типа
@@ -283,7 +283,7 @@ class RustorePayPlugin : CordovaPlugin() {
                     }
 
                     val data = mapOf("purchases" to purchasesArray)
-                    helper.callbackSuccess(callbackContext, "Purchases retrieved successfully", data)
+                    helper.callbackSuccessRaw(callbackContext, data)
                 }
                 .addOnFailureListener { throwable ->
                     helper.log("getPurchases error", throwable.message)
@@ -371,12 +371,11 @@ class RustorePayPlugin : CordovaPlugin() {
                             helper.log("purchase success", "Purchase completed")
 
                             val data = mapOf(
-                                "purchaseId" to result.purchaseId,
-                                "productId" to result.productId,
-                                "invoiceId" to result.invoiceId
+                                "purchaseId" to result.purchaseId?.value,
+                                "productId" to result.productId?.value,
+                                "invoiceId" to result.invoiceId?.value
                             )
-
-                            helper.callbackSuccess(callbackContext, "Purchase completed successfully", data)
+                            helper.callbackSuccessRaw(callbackContext, data)
                         }
                         .addOnFailureListener { throwable ->
                             val errorMessage = throwable.message ?: "Unknown error"
@@ -412,28 +411,21 @@ class RustorePayPlugin : CordovaPlugin() {
                 .addOnSuccessListener { status ->
                     helper.log("getUserAuthorizationStatus success", "Status: $status")
 
-                    val statusData = when (status) {
-                        UserAuthorizationStatus.AUTHORIZED -> {
-                            mapOf(
-                                "isAuthorized" to true,
-                                "status" to "authorized"
-                            )
-                        }
-                        UserAuthorizationStatus.UNAUTHORIZED -> {
-                            mapOf(
-                                "isAuthorized" to false,
-                                "status" to "unauthorized"
-                            )
-                        }
-                        else -> {
-                            mapOf(
-                                "isAuthorized" to false,
-                                "status" to "unknown"
-                            )
-                        }
+                    val data = when (status) {
+                        UserAuthorizationStatus.AUTHORIZED -> mapOf(
+                            "isAuthorized" to true,
+                            "status" to "authorized"
+                        )
+                        UserAuthorizationStatus.UNAUTHORIZED -> mapOf(
+                            "isAuthorized" to false,
+                            "status" to "unauthorized"
+                        )
+                        else -> mapOf(
+                            "isAuthorized" to false,
+                            "status" to "unknown"
+                        )
                     }
-
-                    helper.callbackSuccess(callbackContext, "User authorization status retrieved", statusData)
+                    helper.callbackSuccessRaw(callbackContext, data)
                 }
                 .addOnFailureListener { throwable ->
                     helper.log("getUserAuthorizationStatus error", throwable.message)
@@ -459,6 +451,7 @@ class RustorePayPlugin : CordovaPlugin() {
                 return
             }
 
+            // JavaScript отправляет массив productIds напрямую как первый аргумент
             val productIdsArray = args.getJSONArray(0)
             if (productIdsArray.length() == 0) {
                 helper.log("getProducts error", "Empty product IDs array")
@@ -490,20 +483,20 @@ class RustorePayPlugin : CordovaPlugin() {
 
                     for (product in products) {
                         val productMap = mapOf(
-                            "productId" to product.productId,
-                            "type" to product.type,
-                            "amountLabel" to product.amountLabel,
-                            "price" to product.price,
-                            "currency" to product.currency,
-                            "imageUrl" to product.imageUrl,
-                            "title" to product.title,
-                            "description" to product.description
+                            "productId" to product.productId.value,
+                            "type" to product.type.toString(),
+                            "amountLabel" to product.amountLabel?.value,
+                            "price" to product.price?.value,
+                            "currency" to product.currency?.value,
+                            "imageUrl" to product.imageUrl?.value,
+                            "title" to product.title?.value,
+                            "description" to product.description?.value
                         )
                         productsArray.add(productMap)
                     }
 
                     val data = mapOf("products" to productsArray)
-                    helper.callbackSuccess(callbackContext, "Products retrieved successfully", data)
+                    helper.callbackSuccessRaw(callbackContext, data)
                 }
                 .addOnFailureListener { throwable ->
                     helper.log("getProducts error", throwable.message)
@@ -511,7 +504,8 @@ class RustorePayPlugin : CordovaPlugin() {
                 }
 
         } catch (e: Exception) {
-            helper.log("getProducts error", e.message)
+            helper.log("getProducts error", "Exception: ${e.javaClass.simpleName}: ${e.message}")
+            helper.log("getProducts error", "Stack trace: ${e.stackTrace.take(5).joinToString("\n")}")
             helper.callbackError(callbackContext, "getProducts error", e.message)
         }
     }
@@ -526,14 +520,22 @@ class RustorePayPlugin : CordovaPlugin() {
 
             if (isInstalled) {
                 helper.log("openRuStoreDownloadInstruction", "RuStore is already installed")
-                helper.callbackSuccess(callbackContext, "RuStore is already installed on this device")
+                val data = mapOf(
+                    "message" to "RuStore is already installed on this device",
+                    "isInstalled" to true
+                )
+                helper.callbackSuccessRaw(callbackContext, data)
                 return
             }
 
             // Открываем инструкцию по установке RuStore
             RuStoreUtils.openRuStoreDownloadInstruction(this.cordova.activity)
             helper.log("openRuStoreDownloadInstruction", "RuStore download instruction opened")
-            helper.callbackSuccess(callbackContext, "RuStore download instruction opened successfully")
+            val data = mapOf(
+                "message" to "RuStore download instruction opened successfully",
+                "opened" to true
+            )
+            helper.callbackSuccessRaw(callbackContext, data)
 
         } catch (e: Exception) {
             helper.log("openRuStoreDownloadInstruction error", e.message)
@@ -558,7 +560,11 @@ class RustorePayPlugin : CordovaPlugin() {
             // Открываем RuStore
             RuStoreUtils.openRuStore(this.cordova.activity)
             helper.log("openRuStore", "RuStore opened successfully")
-            helper.callbackSuccess(callbackContext, "RuStore opened successfully")
+            val data = mapOf(
+                "message" to "RuStore opened successfully",
+                "opened" to true
+            )
+            helper.callbackSuccessRaw(callbackContext, data)
 
         } catch (e: Exception) {
             helper.log("openRuStore error", e.message)

@@ -46,9 +46,9 @@
 
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
             <!-- ЗАМЕНИТЕ НА РЕАЛЬНЫЙ ID ПРИЛОЖЕНИЯ ИЗ RUSTORE -->
-            <meta-data android:name="console_app_id_value" android:value="{{НУЖНО ЗАМЕНИТЬ}}" />
+            <meta-data android:name="console_app_id_value" android:value="64612543" />
             <!-- DEEP LINK ПРИЛОЖЕНИЯ -->
-            <meta-data android:name="sdk_pay_scheme_value" android:value="{{НУЖНО ЗАМЕНИТЬ}}.pay" />
+            <meta-data android:name="sdk_pay_scheme_value" android:value="com.demo.stand.pay" />
             <!-- Включает тестовый режим платежей -->
             <meta-data android:name="ru_store_test_mode" android:value="true" />
 
@@ -61,7 +61,7 @@
                     <action android:name="android.intent.action.VIEW" />
                     <category android:name="android.intent.category.DEFAULT" />
                     <category android:name="android.intent.category.BROWSABLE" />
-                    <data android:scheme="{{НУЖНО ЗАМЕНИТЬ}}.pay" />
+                    <data android:scheme="com.demo.stand.pay" />
                 </intent-filter>
             </activity>
         </config-file>
@@ -71,7 +71,7 @@
 
         <config-file target="res/values/strings.xml" parent="/*">
             <!-- ЗАМЕНИТЕ НА РЕАЛЬНЫЙ ID ПРИЛОЖЕНИЯ ИЗ RUSTORE -->
-            <string name="console_app_id_value">{{НУЖНО ЗАМЕНИТЬ}}</string>
+            <string name="console_app_id_value">64612543</string>
         </config-file>
     </platform>
 </plugin>

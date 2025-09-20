@@ -167,6 +167,74 @@ internal abstract class BaseHelper(
     }
 
     /**
+     * Helper method to return raw data without wrapper
+     * @param callbackContext Cordova callback context
+     * @param data Data to return
+     */
+    fun callbackSuccessRaw(
+        callbackContext: CallbackContext,
+        data: Any
+    ) {
+        try {
+            when (data) {
+                is Map<*, *> -> {
+                    val jsonObject = JSONObject()
+                    for ((key, value) in data) {
+                        when (value) {
+                            null -> jsonObject.put(key.toString(), JSONObject.NULL)
+                            is List<*> -> {
+                                val jsonArray = JSONArray()
+                                for (item in value) {
+                                    when (item) {
+                                        is Map<*, *> -> {
+                                            val itemJson = JSONObject()
+                                            for ((itemKey, itemValue) in item) {
+                                                when (itemValue) {
+                                                    null -> itemJson.put(itemKey.toString(), JSONObject.NULL)
+                                                    else -> itemJson.put(itemKey.toString(), itemValue)
+                                                }
+                                            }
+                                            jsonArray.put(itemJson)
+                                        }
+                                        else -> jsonArray.put(item)
+                                    }
+                                }
+                                jsonObject.put(key.toString(), jsonArray)
+                            }
+                            else -> jsonObject.put(key.toString(), value)
+                        }
+                    }
+                    callbackContext.success(jsonObject)
+                }
+                is String -> callbackContext.success(data)
+                is Boolean -> {
+                    val jsonObject = JSONObject()
+                    jsonObject.put("success", data)
+                    callbackContext.success(jsonObject)
+                }
+                is Int -> {
+                    val jsonObject = JSONObject()
+                    jsonObject.put("success", data)
+                    callbackContext.success(jsonObject)
+                }
+                is Number -> {
+                    val jsonObject = JSONObject()
+                    jsonObject.put("success", data)
+                    callbackContext.success(jsonObject)
+                }
+                else -> {
+                    val jsonString = gson.toJson(data)
+                    val jsonObject = JSONObject(jsonString)
+                    callbackContext.success(jsonObject)
+                }
+            }
+        } catch (e: Exception) {
+            log("callbackSuccessRaw error", e.message)
+            callbackContext.error("Callback error: ${e.message}")
+        }
+    }
+
+    /**
      * Helper method to safely execute callback with error result
      * @param callbackContext Cordova callback context
      * @param message Error message
