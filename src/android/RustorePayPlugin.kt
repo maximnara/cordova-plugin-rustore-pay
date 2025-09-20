@@ -245,16 +245,40 @@ class RustorePayPlugin : CordovaPlugin() {
                     val purchasesArray = mutableListOf<Map<String, Any?>>()
 
                     for (purchase in purchases) {
-                        val purchaseMap = mapOf(
+                        // Общие поля для всех типов покупок (из общего интерфейса)
+                        val purchaseMap = mutableMapOf<String, Any?>(
                             "purchaseId" to purchase.purchaseId,
                             "invoiceId" to purchase.invoiceId,
-                            "description" to purchase.description,
-                            "purchaseTime" to purchase.purchaseTime,
+                            "purchaseTime" to purchase.purchaseTime?.time,
                             "orderId" to purchase.orderId,
+                            "purchaseType" to purchase.purchaseType.toString(),
+                            "description" to purchase.description,
                             "amountLabel" to purchase.amountLabel,
+                            "price" to purchase.price,
                             "currency" to purchase.currency,
-                            "developerPayload" to purchase.developerPayload
+                            "status" to purchase.status.toString(),
+                            "developerPayload" to purchase.developerPayload,
+                            "sandbox" to purchase.sandbox
                         )
+
+                        // Добавляем специфичные поля в зависимости от типа покупки
+                        when (purchase) {
+                            is ru.rustore.sdk.pay.model.ProductPurchase -> {
+                                // Специфичные поля для обычных продуктов (CONSUMABLE/NON_CONSUMABLE)
+                                purchaseMap["productId"] = purchase.productId
+                                purchaseMap["quantity"] = purchase.quantity
+                                purchaseMap["productType"] = purchase.productType.toString()
+                                purchaseMap["type"] = "PRODUCT" // Для идентификации типа
+                            }
+                            is ru.rustore.sdk.pay.model.SubscriptionPurchase -> {
+                                // Специфичные поля для подписок
+                                purchaseMap["productId"] = purchase.productId
+                                purchaseMap["expirationDate"] = purchase.expirationDate?.time
+                                purchaseMap["gracePeriodEnabled"] = purchase.gracePeriodEnabled
+                                purchaseMap["type"] = "SUBSCRIPTION" // Для идентификации типа
+                            }
+                        }
+
                         purchasesArray.add(purchaseMap)
                     }
 

@@ -170,17 +170,32 @@ result.products.forEach(product => {
 ```typescript
 Promise<{
   purchases: Array<{
-    purchaseId: string;      // ID покупки
-    productId: string;       // ID продукта
-    productType: string;     // Тип продукта
-    invoiceId: string;       // ID счета
-    description: string;     // Описание
-    purchaseTime: number;    // Время покупки (timestamp)
-    orderId: string;         // ID заказа
-    amountLabel: string;     // Сумма
-    currency: string;        // Валюта
-    developerPayload: string; // Дополнительные данные
-    purchaseStatus: string;  // Статус покупки
+    // Общие поля для всех типов покупок (интерфейс Purchase):
+    purchaseId: string;          // ID покупки
+    invoiceId: string;           // ID счета
+    purchaseTime: number;        // Время покупки (timestamp)
+    orderId: string;             // ID заказа
+    purchaseType: string;        // Тип покупки
+    description: string;         // Описание
+    amountLabel: string;         // Отформатированная сумма
+    price: number;               // Цена в копейках
+    currency: string;            // Валюта
+    status: string;              // Статус покупки
+    developerPayload: string;    // Дополнительные данные разработчика
+    sandbox: boolean;            // Тестовая покупка
+
+    // Специфичные поля для CONSUMABLE и NON_CONSUMABLE (ProductPurchase):
+    productId?: string;          // ID продукта
+    quantity?: number;           // Количество
+    productType?: string;        // Тип продукта (CONSUMABLE_PRODUCT/NON_CONSUMABLE_PRODUCT)
+
+    // Специфичные поля для SUBSCRIPTION (SubscriptionPurchase):
+    productId?: string;          // ID продукта подписки
+    expirationDate?: number;     // Дата истечения подписки (timestamp)
+    gracePeriodEnabled?: boolean; // Льготный период включен
+
+    // Вспомогательное поле:
+    type?: string;               // "PRODUCT" для товаров или "SUBSCRIPTION" для подписок
   }>
 }>
 ```
@@ -241,9 +256,13 @@ const paidNonConsumables = await RustorePay.getPurchases({
 // Обработка результатов
 allPurchases.purchases.forEach(purchase => {
     const date = new Date(purchase.purchaseTime);
-    console.log(`${purchase.productId} (${purchase.productType}): ${purchase.purchaseStatus}`);
+    console.log(`Покупка: ${purchase.purchaseId}`);
+    console.log(`  Продукт: ${purchase.productId || 'N/A'}`);
+    console.log(`  Статус: ${purchase.status}`);
+    console.log(`  Тип: ${purchase.type || purchase.purchaseType}`);
     console.log(`  Куплено: ${date.toLocaleDateString()}`);
     console.log(`  Сумма: ${purchase.amountLabel}`);
+    console.log(`  Тестовая: ${purchase.sandbox ? 'Да' : 'Нет'}`);
 });
 ```
 
