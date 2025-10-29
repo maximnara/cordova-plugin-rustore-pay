@@ -19,6 +19,10 @@ Cordova плагин для интеграции с платежной сист�
 ```bash
 cordova plugin add ../cordova-plugin-rustore-pay/
 ```
+или
+```bash
+cordova plugin add cordova-plugin-rustore-pay
+```
 
 ## 📱 Поддерживаемые платформы
 
